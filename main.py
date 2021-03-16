@@ -1,93 +1,35 @@
 # VLSM calculator.
 
 import subnets
+from functions import *
 
 
-def validate_address(address):
-    """Validating address input within ip-address octet range: 0 - 255
-    :param address - user input string
-    :return result - list with str -> int converted values validated within range
-    """
-    result = address.split(".")
-    for i in range(len(result)):
-        result[i] = int(result[i])
-        while result[i] < 0 or result[i] > 255:
-            print(str(result[i]) + " is out of the valid 0 - 255 range.")
-            result[i] = int(input("Enter value in the valid 0 - 255 range: "))
-    return result
-
-
-def convert_binary(decimal):
-    """Converting decimal based list to binary values with preceding 0 values
-    :param decimal - list with decimal values
-    :return binary - list with binary values
-    """
-    binary = []
-    for i in range(len(decimal)):
-        binary.append(format(decimal[i], '08b'))
-    return binary
-
-
-def convert_decimal(binary):
-    """Converting binary based list to decimal values
-    :param binary - list with binary values
-    :return decimal - list with decimal values
-    """
-    decimal = []
-    for i in range(len(binary)):
-        decimal.append(int(binary[i], 2))
-    return decimal
-
-
-def count_prefix_length(subnet_mask):
-    """Determine the prefix length for a subnet mask (counting 1's vs 0's)
-    :param subnet_mask - subnet mask to be counted
-    :return count - count of 1's -> prefix length
-    """
-    count = 0
-    for i in range(4):
-        for j in range(8):
-            if subnet_mask[i][j] == '1':
-                count += 1
-    return count
-
-
-def new_network_address(host, subnet_mask):
-    """Compare the original host address and the new subnet mask. If values are 1 == 1, a binary 1 gets assigned, else 0
-    :param host - the original host address to be converted
-    :param subnet_mask - the new subnet mask to compare
-    return address - list of octet lists with binary (str) values
-    """
-    address = [[], [], [], []]
-    for i in range(4):
-        for j in range(8):
-            if host[i][j] == '1' and subnet_mask[i][j] == '1':
-                address[i].append("1")
-            else:
-                address[i].append("0")
-    for i in range(4):
-        empty = ""
-        address[i] = empty.join(address[i])
-    return address
-
-
-# main
-if __name__ == '__main__':
+def main():
+    # Get input then convert the string arrays into integer arrays
     original_host = validate_address(input("Host IP Address: "))
     original_mask = validate_address(input("Original Subnet Mask: "))
     new_mask = validate_address(input("New Subnet Mask: "))
 
+    # Convert the integer arrays into binary arrays
     binary_host = convert_binary(original_host)
     binary_mask = convert_binary(original_mask)
     binary_new = convert_binary(new_mask)
 
+    # Get the prefix length
+    # i.e. 255.255.255.0 -> 11111111.11111111.11111111.0 in binary
+    # counting the 1's, you get /24 prefix
     new_count = count_prefix_length(binary_new)
     old_count = count_prefix_length(binary_mask)
 
+    # The number of subnets = 2^(new prefix - old prefix)
     num_subnets = pow(2, new_count - old_count)
+
+    # The number of hosts per subnet = 2^(/32 - new prefix) - 2
+    # /32 used above is the highest class 255.255.255.255
     hosts_per_subnet = pow(2, 32 - new_count) - 2
 
-    new_host = convert_decimal(new_network_address(binary_host, binary_new))
+    # Retrieve the new starting network address using the binary host and mask then convert to decimal
+    new_host = convert_decimal(new_network_address(binary_host, binary_mask))
 
     print(*new_host)
     subnet_list = []
@@ -97,3 +39,8 @@ if __name__ == '__main__':
         # calculate addresses for subnet, then append to list
         subnet_list.append(subnet)
         # update using hosts_per_subnet or broadcast address, the next available address
+
+
+# main
+if __name__ == '__main__':
+    main()

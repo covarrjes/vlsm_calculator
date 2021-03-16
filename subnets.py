@@ -5,9 +5,9 @@ class Subnet:
     def __init__(self, count, network):
         self.host_count = count
         self.network = network
-        self.first_host = ""
-        self.last_host = ""
-        self.broadcast = ""
+        self.first_host = network[3] + 1
+        self.last_host = network[3] + count - 1
+        self.broadcast = network[3] + count
 
     def get_count(self):
         return self.host_count
@@ -23,3 +23,4 @@ class Subnet:
 
     def get_broadcast(self):
         return self.broadcast
+
