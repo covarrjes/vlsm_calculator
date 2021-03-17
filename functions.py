@@ -30,25 +30,31 @@ def convert_decimal(binary):
     """Converting binary based list to decimal values
     :param binary - list with binary values
     :return decimal - list with decimal values
+
+    Bugs: not having str leads to int() can't convert non-string with explicit base
     """
     decimal = []
     for i in range(len(binary)):
-        decimal.append(int(binary[i], 2))
+        decimal.append(int(str(binary[i]), 2))
     return decimal
 
 
 def invert_subnet_mask(subnet_mask):
     """Invert the subnet mask for broadcast address determination
     :param subnet_mask - the original subnet mask of the given host
-    :return inverted subnet mask"""
+    :return inverted subnet
+    """
     inverted = [[], [], [], []]
     for i in range(4):
         for j in range(8):
-            if subnet_mask[i][j] == 1:
+            if subnet_mask[i][j] == '1':
                 inverted[i].append("0")
             else:
                 inverted[i].append("1")
-    return 0
+    for i in range(4):
+        empty = ""
+        inverted[i] = empty.join(inverted[i])
+    return inverted
 
 
 def count_prefix_length(subnet_mask):
@@ -116,5 +122,5 @@ def broadcast_address(address, inverted_subnet_mask):
                 result_address[i].append("0")
     for i in range(4):
         empty = ""
-        address[i] = empty.join(address[i])
+        result_address[i] = empty.join(result_address[i])
     return result_address

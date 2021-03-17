@@ -11,19 +11,21 @@ def main():
     new_mask = validate_address(input("New Subnet Mask: "))
 
     # Convert the integer arrays into binary arrays
-    binary_host = convert_binary(original_host)
-    binary_mask = convert_binary(original_mask)
-    inverted_mask = invert_subnet_mask(binary_mask)
-    binary_new = convert_binary(new_mask)
+    original_host = convert_binary(original_host)
+    original_mask = convert_binary(original_mask)
 
-    print(*binary_mask)
+    new_mask = convert_binary(new_mask)
+
+    inverted_mask = invert_subnet_mask(original_mask)
+
+    print(original_mask)
     print(inverted_mask)
 
     # Get the prefix length
     # i.e. 255.255.255.0 -> 11111111.11111111.11111111.00000000 in binary
     # counting the 1's, you get /24 prefix
-    new_count = count_prefix_length(binary_new)
-    old_count = count_prefix_length(binary_mask)
+    new_count = count_prefix_length(new_mask)
+    old_count = count_prefix_length(original_mask)
 
     # The number of subnets = 2^(new prefix - old prefix)
     num_subnets = subnet_count(new_count, old_count)
@@ -33,10 +35,12 @@ def main():
     hosts_per_subnet = host_count(new_count)
 
     # Retrieve the network address using the binary converted host and mask then convert to decimal
-    network = convert_decimal(network_address(binary_host, binary_mask))
-    binary_network = convert_binary(network)
-    broadcast = convert_decimal(broadcast_address(binary_network, inverted_mask))
+    network = network_address(original_host, original_mask)
+    network = convert_decimal(network)
 
+    broadcast = convert_decimal(broadcast_address(network, inverted_mask))
+
+    print("Original Network -")
     print("Network address: ")
     print(*network)
 
