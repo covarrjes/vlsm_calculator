@@ -1,5 +1,5 @@
 # subnet class
-
+# Goals:
 class Subnet:
 
     def __init__(self, count, network):

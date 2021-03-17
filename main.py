@@ -13,29 +13,40 @@ def main():
     # Convert the integer arrays into binary arrays
     binary_host = convert_binary(original_host)
     binary_mask = convert_binary(original_mask)
+    inverted_mask = invert_subnet_mask(binary_mask)
     binary_new = convert_binary(new_mask)
 
+    print(*binary_mask)
+    print(inverted_mask)
+
     # Get the prefix length
-    # i.e. 255.255.255.0 -> 11111111.11111111.11111111.0 in binary
+    # i.e. 255.255.255.0 -> 11111111.11111111.11111111.00000000 in binary
     # counting the 1's, you get /24 prefix
     new_count = count_prefix_length(binary_new)
     old_count = count_prefix_length(binary_mask)
 
     # The number of subnets = 2^(new prefix - old prefix)
-    num_subnets = pow(2, new_count - old_count)
+    num_subnets = subnet_count(new_count, old_count)
 
     # The number of hosts per subnet = 2^(/32 - new prefix) - 2
     # /32 used above is the highest class 255.255.255.255
-    hosts_per_subnet = pow(2, 32 - new_count) - 2
+    hosts_per_subnet = host_count(new_count)
 
-    # Retrieve the new starting network address using the binary host and mask then convert to decimal
-    new_host = convert_decimal(new_network_address(binary_host, binary_mask))
+    # Retrieve the network address using the binary converted host and mask then convert to decimal
+    network = convert_decimal(network_address(binary_host, binary_mask))
+    binary_network = convert_binary(network)
+    broadcast = convert_decimal(broadcast_address(binary_network, inverted_mask))
 
-    print(*new_host)
+    print("Network address: ")
+    print(*network)
+
+    print("Broadcast address: ")
+    print(*broadcast)
+
     subnet_list = []
 
     for i in range(num_subnets):
-        subnet = subnets.Subnet(hosts_per_subnet, new_host)
+        subnet = subnets.Subnet(hosts_per_subnet, network)
         # calculate addresses for subnet, then append to list
         subnet_list.append(subnet)
         # update using hosts_per_subnet or broadcast address, the next available address

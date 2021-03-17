@@ -37,6 +37,20 @@ def convert_decimal(binary):
     return decimal
 
 
+def invert_subnet_mask(subnet_mask):
+    """Invert the subnet mask for broadcast address determination
+    :param subnet_mask - the original subnet mask of the given host
+    :return inverted subnet mask"""
+    inverted = [[], [], [], []]
+    for i in range(4):
+        for j in range(8):
+            if subnet_mask[i][j] == 1:
+                inverted[i].append("0")
+            else:
+                inverted[i].append("1")
+    return 0
+
+
 def count_prefix_length(subnet_mask):
     """Determine the prefix length for a subnet mask (counting 1's vs 0's)
     :param subnet_mask - subnet mask to be counted
@@ -50,11 +64,29 @@ def count_prefix_length(subnet_mask):
     return count
 
 
-def new_network_address(host, subnet_mask):
+def subnet_count(new_prefix_count, old_prefix_count):
+    """Determine the amount of subnets created with the prefix of new vs old subnets
+    :param new_prefix_count - the new subnet prefix
+    :param old_prefix_count - the old subnet prefix
+    :return count - count of subnets created"""
+    count = pow(2, new_prefix_count - old_prefix_count)
+    return count
+
+
+def host_count(new_prefix_count):
+    """Determine the amount of hosts per subnet
+    :param new_prefix_count - the new subnet prefix
+    :return count - the number of hosts per subnet"""
+    count = pow(2, 32 - new_prefix_count) - 2
+    return count
+
+
+def network_address(host, subnet_mask):
     """Compare the original host address and the new subnet mask. If values are 1 == 1, a binary 1 gets assigned, else 0
+    This is bitwise AND
     :param host - the original host address to be converted
     :param subnet_mask - the new subnet mask to compare
-    return address - list of octet lists with binary (str) values
+    :return address - list of octet lists with binary (str) values
     """
     address = [[], [], [], []]
     for i in range(4):
@@ -67,3 +99,22 @@ def new_network_address(host, subnet_mask):
         empty = ""
         address[i] = empty.join(address[i])
     return address
+
+
+def broadcast_address(address, inverted_subnet_mask):
+    """Compare the calculated network address with the inverted subnet mask to determine the broadcast address. This
+    is a bitwise OR determination
+    :param address - the network address
+    :param inverted_subnet_mask - the opposite of the subnet mask
+    :return result_address - the broadcast address of the subnet"""
+    result_address = [[], [], [], []]
+    for i in range(4):
+        for j in range(8):
+            if address[i][j] == '1' or inverted_subnet_mask[i][j] == '1':
+                result_address[i].append("1")
+            else:
+                result_address[i].append("0")
+    for i in range(4):
+        empty = ""
+        address[i] = empty.join(address[i])
+    return result_address
